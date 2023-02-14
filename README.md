@@ -14,3 +14,5 @@ master branch - main branch that everything runs on
 - Only 1 person does push.
 
 6. git merge master
+
+7. git checkout [branch name here]
