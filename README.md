@@ -10,9 +10,9 @@ master branch - main branch that everything runs on
 - git commit -m "version 1"
 - -m = extra message
 
-5. git push - pushes out new version.
+1. git push - pushes out new version.
 - Only 1 person does push.
 
-6. git merge master
+1. git merge master
 
-7. git checkout [branch name here]
+2. git checkout [branch name here]
