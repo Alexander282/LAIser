@@ -7,8 +7,10 @@ master branch - main branch that everything runs on
 2. git status - check which ones are ready
 
 3. git commit - take git add files to the next main version
-a. git commit -m "version 1"
--m = extra message
+- git commit -m "version 1"
+- -m = extra message
 
-4. git push - pushes out new version.
-a. Only 1 person does push.
+5. git push - pushes out new version.
+- Only 1 person does push.
+
+6. git merge master
