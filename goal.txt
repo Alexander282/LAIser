@@ -1,0 +1,7 @@
+Mäng on sarnane gameplay poolest mängule "Fireboy / Watergirl", kus sama arvuti taga juhivad kaks
+mängijat kahte tegelast, üks kasutab WASD, teine noole klahve.
+Siin mängus oleks üks tegelane inimene, kes peab laborist põgenema, teine AI, kes juhib laboris olevaid blokke
+Blokid suunavad lasereid, laser peab jõudma retseptorisse, et uks avaneks.
+Inimene ei saa laseritest läbi minna.
+
+Mäng on top-down 2D, pixelated
