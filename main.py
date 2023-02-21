@@ -18,6 +18,7 @@ while running:
         x+=1
     screen.fill((0,0,0))
     pygame.draw.rect(screen, (255, 100, 100), (x, 30, 60, 60))
+    pygame.time.delay(100)
     for event in pygame.event.get():
 
 
