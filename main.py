@@ -1,5 +1,6 @@
 # Start of Setup
 import pygame
+import attributes
 pygame.init()
 screen_width = 600
 screen_height = 600
@@ -7,14 +8,14 @@ screen =  pygame.display.set_mode((screen_width, screen_height))
 running = True
 # End of Setup
 pygame.display.set_caption("LAIser")
-class ruut:
-    def __init__(self, side_length):
-        self.side_length = side_length
-
-
 #picture = pygame.image.load("folder/name.png").conver_alpha
 #screen.blit(picture, (x,y))
+props = {"Wood_Box":attributes.Attributes(False, True, False, ""),
+         "AI_Box":attributes.Attributes(False,False,True,"")
 
+
+
+}
 x = 0
 y = 0
 
@@ -46,7 +47,7 @@ while running:
                 y+=60
         elif event.type == pygame.QUIT:
             running = False
-    if x > screen_height:
+    if x > screen_height-60:
         x -= 60
     #elif x < 0:
     # 1 frame
