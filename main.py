@@ -53,7 +53,7 @@ menu_buttons = {
               "height":100,
               "active":False}
 }
-
+#
 #   settings = settings menu
 #   select = choose a stage
 #       level = the active level
