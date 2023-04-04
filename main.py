@@ -11,8 +11,8 @@ pygame.display.set_caption("LAIser")
 #picture = pygame.image.load("folder/name.png").conver_alpha
 #screen.blit(picture, (x,y))
 props = {"Wood_Box":attributes.Attributes(False, True, False, ""),
-         "AI_Box":attributes.Attributes(False,False,True,"")
-
+         "AI_Box":attributes.Attributes(False,False,True,""),
+         "Block":attributes.Attributes(False,False,False,"")
 
 
 }
@@ -20,38 +20,57 @@ x = 0
 y = 0
 
 
+status = "menu"
 
-
+# statuses:
+# menu = main menu
+#   settings = settings menu
+#   select = choose a stage
+#       level = the active level
 while running:
-    #               (where, (colour R,G,B), (xpos, ypos, xsize, ysize)
-    screen.fill((128,128,128))
+    mousex, mousey = pygame.mouse.get_pos()
+    if status == "menu":
+        screen.fill((128, 128, 128))
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                pygame.draw.rect(screen, (190, 190, 190), (mousex-50, mousey-50, 100,100))
+                print(mousex,mousey)
+            elif event.type == pygame.QUIT:
+                running = False
+    elif status == "settings":
+        screen.fill((128, 128, 128))
+    elif status == "select":
+        screen.fill((128, 128, 128))
+    elif status == "level":
+        #               (where, (colour R,G,B), (xpos, ypos, xsize, ysize)
+        screen.fill((128,128,128))
 
-    for xgrid in range(11):
-        pygame.draw.rect(screen, (190,190,190), (xgrid*60-3, 0, 6, 600))
-    for ygrid in range(11):
-        pygame.draw.rect(screen, (190, 190, 190), (0, ygrid * 60-3, 600, 6))
-    pygame.time.delay(100)
-    for event in pygame.event.get():
+        for xgrid in range(11):
+            pygame.draw.rect(screen, (190,190,190), (xgrid*60-3, 0, 6, 600))
+        for ygrid in range(11):
+            pygame.draw.rect(screen, (190, 190, 190), (0, ygrid * 60-3, 600, 6))
+        pygame.time.delay(100)
+        for event in pygame.event.get():
 
 
 
-    # Start of QUIT
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_a:
-                x-=60
-            elif event.key == pygame.K_d:
-                x+=60
-            elif event.key == pygame.K_w:
-                y-=60
-            elif event.key == pygame.K_s:
-                y+=60
-        elif event.type == pygame.QUIT:
-            running = False
-    if x > screen_height-60:
-        x -= 60
-    #elif x < 0:
-    # 1 frame
-    pygame.draw.rect(screen, (255,50,50), (x+5, y+5, 50, 50))
+        # Start of QUIT
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_a:
+                    x-=60
+                elif event.key == pygame.K_d:
+                    x+=60
+                elif event.key == pygame.K_w:
+                    y-=60
+                elif event.key == pygame.K_s:
+                    y+=60
+            elif event.type == pygame.QUIT:
+                running = False
+        if x > screen_height-60:
+            x -= 60
+        #elif x < 0:
+        # 1 frame
+        pygame.draw.rect(screen, (255,50,50), (x+5, y+5, 50, 50))
     pygame.display.update()
 
 pygame.quit()
