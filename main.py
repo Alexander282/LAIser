@@ -2,6 +2,8 @@
 import pygame
 import attributes
 pygame.init()
+pygame.font.init()
+
 screen_width = 600
 screen_height = 600
 screen =  pygame.display.set_mode((screen_width, screen_height))
@@ -62,12 +64,17 @@ while running:
         screen.fill((128, 128, 128))
         for button in menu_buttons:
             cur_but = menu_buttons[button]
+            button_font = pygame.font.SysFont('swis721', 30)
             if mousex in range(cur_but["xpos"],cur_but["xpos"]+cur_but["width"]) and mousey in range(cur_but["ypos"],cur_but["ypos"]+cur_but["height"]):
                 pygame.draw.rect(screen, cur_but["highlight"], (cur_but["xpos"], cur_but["ypos"], cur_but["width"], cur_but["height"]))
+
+
                 cur_but["active"] = True
             else:
                 pygame.draw.rect(screen,cur_but["color"],(cur_but["xpos"], cur_but["ypos"], cur_but["width"], cur_but["height"]))
                 cur_but["active"] = False
+            text_surface = button_font.render(str(button), False, (0, 0, 0))
+            screen.blit(text_surface, (cur_but["xpos"]+int(cur_but["width"]/2)-int(button_font.size(str(button))[0]/2), cur_but["ypos"]+int(cur_but["height"]/2)-int(button_font.size(str(button))[1]/2)))
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if menu_buttons["play"]["active"]:
