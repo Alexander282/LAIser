@@ -11,17 +11,19 @@ screen_width = tile_size * tile_amount
 screen_height = tile_size * tile_amount
 screen = pygame.display.set_mode((screen_width, screen_height))
 running = True
+
+
 # End of Setup
 pygame.display.set_caption("LAIser")
 # picture = pygame.image.load("folder/name.png").conver_alpha
 # screen.blit(picture, (x,y))
 props = {
     # "name":attributes.Attributes(name, deadly, pushable, player, ai_controlled, laser_redirect)
-    "Wood_Box": attributes.Attributes("Wood_Box", False, True, False, False, "", False),
-    "AI_Box": attributes.Attributes("AI_Box", False, False, False, True, "", False),
-    "Block": attributes.Attributes("Block", False, False, False, False, "", False),
-    "Player": attributes.Attributes("Player", False, False, True, False, "", False),
-    "Goal": attributes.Attributes("Player", False, False, False, False, "", True),
+    "Wood_Box": attributes.Attributes("Wood_Box", False, True, False, False, "", False, pygame.image.load("sprites\\Wood_Box.png").convert_alpha()),
+    "AI_Box": attributes.Attributes("AI_Box", False, False, False, True, "", False, pygame.image.load("sprites\\AI_Box.png").convert_alpha()),
+    "Block": attributes.Attributes("Block", False, False, False, False, "", False, pygame.image.load("sprites\\Block.png").convert_alpha()),
+    "Player": attributes.Attributes("Player", False, False, True, False, "", False, pygame.image.load("sprites\\Player.png").convert_alpha()),
+    "Goal": attributes.Attributes("Player", False, False, False, False, "", True, None),
 }
 
 player_x = 0
@@ -80,6 +82,7 @@ stages = {
             [0, 1, props["Wood_Box"]],
             [4, 1, props["Wood_Box"]],
             [0, 2, props["AI_Box"]],
+            [3, 2, props["AI_Box"]],
             [2, 2, props["Player"]],
 
         ]
@@ -132,6 +135,7 @@ for key in stages.keys():
 #   settings = settings menu
 #   select = choose a stage
 #       level = the active level
+selection = 1
 while running:
     mousex, mousey = pygame.mouse.get_pos()
     fps = 60
@@ -204,7 +208,7 @@ while running:
     elif status == "level":
         active_level = stages[selection]
         # (where, (colour R,G,B), (xpos, ypos, xsize, ysize)
-        screen.fill((128, 128, 128))
+        screen.fill((128, 178, 128))
 
         # drawing the grid
         for xgrid in range(11):
@@ -234,7 +238,6 @@ while running:
                         pushable_collision.append([object[0], object[1]])
                     else:
                         other_collision.append([object[0], object[1]])
-                print(pushable_collision, player_collision)
                 player_x = 0
                 player_y = 0
                 AI_x = 0
@@ -268,15 +271,13 @@ while running:
                 for object in stages[selection][1]:
                     if player_move and object[2].player:
                         if [object[0] + player_x, object[1] + player_y] in AI_collision or [object[0] + player_x, object[1] + player_y] in other_collision:
-                            player_x = 0
-                            player_y = 0
+                            continue
                         else:
                             if [object[0] + player_x, object[1] + player_y] in pushable_collision:
                                 for object2 in stages[selection][1]:
                                     if object2[2].pushable and object2[0] == object[0] + player_x and object2[1] == object[1] + player_y:
                                         if [object2[0] + player_x, object2[1] + player_y] in AI_collision or [object2[0] + player_x, object2[1] + player_y] in other_collision or [object2[0] + player_x, object2[1] + player_y] in pushable_collision:
-                                            player_x = 0
-                                            player_y = 0
+                                            continue
                                         else:
                                             object[0] += player_x
                                             object[1] += player_y
@@ -287,12 +288,14 @@ while running:
                                 object[1] += player_y
                     elif AI_move and object[2].ai_controlled:
                         if [object[0] + AI_x, object[1] + AI_y] in player_collision or [object[0] + AI_x, object[1] + AI_y] in other_collision or [object[0] + AI_x, object[1] + AI_y] in pushable_collision:
-                            AI_x = 0
-                            AI_y = 0
+                            continue
                         else:
                             object[0] += AI_x
                             object[1] += AI_y
-
+                player_x = 0
+                player_y = 0
+                AI_x = 0
+                AI_y = 0
             elif event.type == pygame.QUIT:
                 running = False
 
@@ -301,33 +304,13 @@ while running:
         for object in active_level[1]:
 
             # in-game, no object should ever reach the outside border.
-            '''if object[0] < 0-offsetx:
-                object[0] = 0-offsetx
-            elif object[0] > tile_amount-offsetx - 1:
-                object[0] = tile_amount-offsetx - 1'''
             pos_x = object[0]
-            '''if object[1] < 0-offsety:
-                object[1] = 0-offsety
-            elif object[1] > tile_amount-offsety - 1:
-                object[1] = tile_amount-offsety - 1'''
             pos_y = object[1]
-            name = object[2].type
-            # move:
+            image = object[2].sprite
 
             # render:
-            if name == "Player":
-                pygame.draw.rect(screen, (255, 250, 50),
-                                 ((offsetx + pos_x) * tile_size, (offsety + pos_y) * tile_size, 50, 50))
-            elif name == "AI_Box":
-                pygame.draw.rect(screen, (155, 250, 50),
-                                 ((offsetx + pos_x) * tile_size, (offsety + pos_y) * tile_size, 50, 50))
-
-            elif name == "Block":
-                pygame.draw.rect(screen, (255, 50, 50),
-                                 ((offsetx + pos_x) * tile_size, (offsety + pos_y) * tile_size, 50, 50))
-            elif name == "Wood_Box":
-                pygame.draw.rect(screen, (100, 150, 50),
-                                 ((offsetx + pos_x) * tile_size, (offsety + pos_y) * tile_size, 50, 50))
+            image = pygame.transform.scale(image, (tile_size,tile_size))
+            screen.blit(image, ((offsetx + pos_x) * tile_size, (offsety + pos_y) * tile_size))
     pygame.display.update()
 pygame.quit()
 # End of QUIT
