@@ -11,7 +11,8 @@ screen_width = tile_size * tile_amount
 screen_height = tile_size * tile_amount
 screen = pygame.display.set_mode((screen_width, screen_height))
 running = True
-
+pos_x = 0
+pos_y = 0
 
 # End of Setup
 pygame.display.set_caption("LAIser")
@@ -23,7 +24,7 @@ props = {
     "AI_Box": attributes.Attributes("AI_Box", False, False, False, True, "", False, pygame.image.load("sprites\\AI_Box.png").convert_alpha()),
     "Block": attributes.Attributes("Block", False, False, False, False, "", False, pygame.image.load("sprites\\Block.png").convert_alpha()),
     "Player": attributes.Attributes("Player", False, False, True, False, "", False, pygame.image.load("sprites\\Player.png").convert_alpha()),
-    "Goal": attributes.Attributes("Player", False, False, False, False, "", True, None),
+    "Goal": attributes.Attributes("Player", False, False, False, False, "", True, pygame.image.load("sprites\\Goal.png").convert_alpha()),
 }
 
 player_x = 0
@@ -47,7 +48,7 @@ stages = {
             [2, 3, props["Block"]],
             [3, 0, props["Block"]],
             [3, 1, props["Block"]],
-            [3, 1, props["Block"]],
+            [3, 2, props["Goal"]],
             [3, 3, props["Block"]],
             [4, 1, props["Block"]],
             [4, 2, props["Block"]],
@@ -74,7 +75,7 @@ stages = {
             [2, 4, props["AI_Box"]],
             [3, 4, props["AI_Box"]],
             [4, 4, props["AI_Box"]],
-
+            [6, 6, props["Goal"]],
         ]
     ],
     3: [  # starting tile:
@@ -203,18 +204,17 @@ while running:
                 for level in select_buttons.keys():
                     if select_buttons[level]["active"]:
                         status = "level"
-                        selection = level
 
     elif status == "level":
-        active_level = stages[selection]
+        active_level = stages[level]
         # (where, (colour R,G,B), (xpos, ypos, xsize, ysize)
         screen.fill((128, 178, 128))
 
         # drawing the grid
         for xgrid in range(11):
-            pygame.draw.rect(screen, (190, 190, 190), (xgrid * 60 - 3, 0, 6, 600))
+            pygame.draw.rect(screen, (220, 220, 220), (xgrid * 60 - 3, 0, 6, 600))
         for ygrid in range(11):
-            pygame.draw.rect(screen, (190, 190, 190), (0, ygrid * 60 - 3, 600, 6))
+            pygame.draw.rect(screen, (220, 220, 220), (0, ygrid * 60 - 3, 600, 6))
         pygame.time.delay(100)
 
         # movement & collision
@@ -228,14 +228,17 @@ while running:
                 AI_collision = []
                 pushable_collision = []
                 other_collision = []
+                goal_position = []
 
-                for object in stages[selection][1]:
+                for object in active_level[1]:
                     if object[2].player:
                         player_collision.append([object[0], object[1]])
                     elif object[2].ai_controlled:
                         AI_collision.append([object[0], object[1]])
                     elif object[2].pushable:
                         pushable_collision.append([object[0], object[1]])
+                    elif object[2].goal:
+                        goal_position.append([object[0], object[1]])
                     else:
                         other_collision.append([object[0], object[1]])
                 player_x = 0
@@ -268,13 +271,15 @@ while running:
                     AI_y = 1
                     AI_move = True
                 # Collision
-                for object in stages[selection][1]:
+                for object in active_level[1]:
                     if player_move and object[2].player:
                         if [object[0] + player_x, object[1] + player_y] in AI_collision or [object[0] + player_x, object[1] + player_y] in other_collision:
                             continue
+                        elif [object[0] + player_x, object[1] + player_y] in goal_position:
+                            status = "menu"
                         else:
                             if [object[0] + player_x, object[1] + player_y] in pushable_collision:
-                                for object2 in stages[selection][1]:
+                                for object2 in active_level[1]:
                                     if object2[2].pushable and object2[0] == object[0] + player_x and object2[1] == object[1] + player_y:
                                         if [object2[0] + player_x, object2[1] + player_y] in AI_collision or [object2[0] + player_x, object2[1] + player_y] in other_collision or [object2[0] + player_x, object2[1] + player_y] in pushable_collision:
                                             continue
@@ -302,15 +307,17 @@ while running:
         # rendering everything
 
         for object in active_level[1]:
-
             # in-game, no object should ever reach the outside border.
             pos_x = object[0]
             pos_y = object[1]
             image = object[2].sprite
+            name = object[2].type
+
 
             # render:
             image = pygame.transform.scale(image, (tile_size,tile_size))
             screen.blit(image, ((offsetx + pos_x) * tile_size, (offsety + pos_y) * tile_size))
+
     pygame.display.update()
 pygame.quit()
 # End of QUIT
