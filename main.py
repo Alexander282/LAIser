@@ -20,11 +20,11 @@ pygame.display.set_caption("LAIser")
 # screen.blit(picture, (x,y))
 props = {
     # "name":attributes.Attributes(name, deadly, pushable, player, ai_controlled, laser_redirect)
-    "Wood_Box": attributes.Attributes("Wood_Box", False, True, False, False, "", False, pygame.image.load("sprites\\Wood_Box.png").convert_alpha()),
-    "AI_Box": attributes.Attributes("AI_Box", False, False, False, True, "", False, pygame.image.load("sprites\\AI_Box.png").convert_alpha()),
-    "Block": attributes.Attributes("Block", False, False, False, False, "", False, pygame.image.load("sprites\\Block.png").convert_alpha()),
-    "Player": attributes.Attributes("Player", False, False, True, False, "", False, pygame.image.load("sprites\\Player.png").convert_alpha()),
-    "Goal": attributes.Attributes("Player", False, False, False, False, "", True, pygame.image.load("sprites\\Goal.png").convert_alpha()),
+    "Wood_Box": attributes.Attributes("Wood_Box", False, False, True, False, False, "", False, pygame.image.load("sprites\\Wood_Box.png").convert_alpha()),
+    "AI_Box": attributes.Attributes("AI_Box", False, False, False, False, True, "", False, pygame.image.load("sprites\\AI_Box.png").convert_alpha()),
+    "Block": attributes.Attributes("Block", False, False, False, False, False, "", False, pygame.image.load("sprites\\Block.png").convert_alpha()),
+    "Player": attributes.Attributes("Player", False, False, False, True, False, "", False, pygame.image.load("sprites\\Player.png").convert_alpha()),
+    "Goal": attributes.Attributes("Player", False, False, False, False, False, "", True, pygame.image.load("sprites\\Goal.png").convert_alpha()),
 }
 
 player_x = 0
@@ -57,25 +57,43 @@ stages = {
         ]
     ],  # props end
     2: [  # starting tile:
-        [0, 0], [  # props:
-            [0, 0, props["AI_Box"]],
-            [1, 0, props["AI_Box"]],
-            [2, 0, props["AI_Box"]],
-            [3, 0, props["AI_Box"]],
-            [4, 0, props["AI_Box"]],
-            [0, 1, props["AI_Box"]],
-            [4, 1, props["AI_Box"]],
-            [0, 2, props["AI_Box"]],
-            [2, 2, props["Player"]],
-            [4, 2, props["AI_Box"]],
-            [0, 3, props["AI_Box"]],
-            [4, 3, props["AI_Box"]],
-            [0, 4, props["AI_Box"]],
-            [1, 4, props["AI_Box"]],
-            [2, 4, props["AI_Box"]],
-            [3, 4, props["AI_Box"]],
-            [4, 4, props["AI_Box"]],
-            [6, 6, props["Goal"]],
+        [2, 2], [  # props:
+            [0, 0, props["Block"]],
+            [0, 1, props["Block"]],
+            [0, 2, props["Block"]],
+            [0, 3, props["Block"]],
+            [0, 4, props["Block"]],
+
+            [1, 0, props["Block"]],
+            [1, 1, props["Block"]],
+            [1, 2, props["Block"]],
+            [1, 3, props["Player"]],
+            [1, 4, props["Block"]],
+
+            [2, 0, props["Block"]],
+            [2, 4, props["Block"]],
+
+            [3, 0, props["Block"]],
+            [3, 1, props["AI_Box"]],
+            [3, 2, props["AI_Box"]],
+            [3, 3, props["AI_Box"]],
+            [3, 4, props["Block"]],
+
+            [4, 0, props["Block"]],
+            [4, 4, props["Block"]],
+
+            [5, 0, props["Block"]],
+            [5, 1, props["Goal"]],
+            [5, 2, props["Block"]],
+            [5, 3, props["Block"]],
+            [5, 4, props["Block"]],
+
+            [6, 0, props["Block"]],
+            [6, 1, props["Block"]],
+            [6, 2, props["Block"]],
+            [6, 3, props["Block"]],
+            [6, 4, props["Block"]]
+
         ]
     ],
     3: [  # starting tile:
@@ -90,7 +108,6 @@ stages = {
     ]
 }
 
-print(stages[1][1][1][2].type)
 status = "menu"
 
 # statuses:
@@ -136,7 +153,7 @@ for key in stages.keys():
 #   settings = settings menu
 #   select = choose a stage
 #       level = the active level
-selection = 1
+
 while running:
     mousex, mousey = pygame.mouse.get_pos()
     fps = 60
@@ -203,10 +220,15 @@ while running:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 for level in select_buttons.keys():
                     if select_buttons[level]["active"]:
+                        selection = level
                         status = "level"
 
     elif status == "level":
-        active_level = stages[level]
+
+        active_level = []
+        for item in stages[selection]:
+            active_level.append(item)
+
         # (where, (colour R,G,B), (xpos, ypos, xsize, ysize)
         screen.fill((128, 178, 128))
 

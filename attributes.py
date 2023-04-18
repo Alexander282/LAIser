@@ -1,7 +1,8 @@
 class Attributes:
 
-    def __init__(self, type, deadly, pushable, player, ai_controlled, laser_redirect, goal, sprite):
+    def __init__(self, active, type, deadly, pushable, player, ai_controlled, laser_redirect, goal, sprite):
         self.type = type
+        self.active = active
         self.deadly = deadly
         self.pushable = pushable
         self.player = player
