@@ -1,7 +1,8 @@
 # Start of Setup
+
 import pygame
 import attributes
-
+import maps.py
 pygame.init()
 pygame.font.init()
 
@@ -153,193 +154,194 @@ for key in stages.keys():
 #   settings = settings menu
 #   select = choose a stage
 #       level = the active level
+def main():
+    while running:
+        mousex, mousey = pygame.mouse.get_pos()
+        fps = 60
 
-while running:
-    mousex, mousey = pygame.mouse.get_pos()
-    fps = 60
+        if status == "menu":
+            screen.fill((128, 128, 128))
+            for button in menu_buttons:
+                cur_but = menu_buttons[button]
+                button_font = pygame.font.SysFont('swis721', 30)
+                if mousex in range(cur_but["xpos"], cur_but["xpos"] + cur_but["width"]) and mousey in range(cur_but["ypos"],
+                                                                                                            cur_but[
+                                                                                                                "ypos"] +
+                                                                                                            cur_but[
+                                                                                                                "height"]):
+                    pygame.draw.rect(screen, cur_but["highlight"],
+                                     (cur_but["xpos"], cur_but["ypos"], cur_but["width"], cur_but["height"]))
 
-    if status == "menu":
-        screen.fill((128, 128, 128))
-        for button in menu_buttons:
-            cur_but = menu_buttons[button]
-            button_font = pygame.font.SysFont('swis721', 30)
-            if mousex in range(cur_but["xpos"], cur_but["xpos"] + cur_but["width"]) and mousey in range(cur_but["ypos"],
-                                                                                                        cur_but[
-                                                                                                            "ypos"] +
-                                                                                                        cur_but[
-                                                                                                            "height"]):
-                pygame.draw.rect(screen, cur_but["highlight"],
-                                 (cur_but["xpos"], cur_but["ypos"], cur_but["width"], cur_but["height"]))
-
-                cur_but["active"] = True
-            else:
-                pygame.draw.rect(screen, cur_but["color"],
-                                 (cur_but["xpos"], cur_but["ypos"], cur_but["width"], cur_but["height"]))
-                cur_but["active"] = False
-            text_surface = button_font.render(str(button), False, (0, 0, 0))
-            screen.blit(text_surface, (
-                cur_but["xpos"] + int(cur_but["width"] / 2) - int(button_font.size(str(button))[0] / 2),
-                cur_but["ypos"] + int(cur_but["height"] / 2) - int(button_font.size(str(button))[1] / 2)))
-        for event in pygame.event.get():
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if menu_buttons["play"]["active"]:
-                    status = "select"
-                elif menu_buttons["settings"]["active"]:
-                    status = "settings"
-                elif menu_buttons["quit"]["active"]:
+                    cur_but["active"] = True
+                else:
+                    pygame.draw.rect(screen, cur_but["color"],
+                                     (cur_but["xpos"], cur_but["ypos"], cur_but["width"], cur_but["height"]))
+                    cur_but["active"] = False
+                text_surface = button_font.render(str(button), False, (0, 0, 0))
+                screen.blit(text_surface, (
+                    cur_but["xpos"] + int(cur_but["width"] / 2) - int(button_font.size(str(button))[0] / 2),
+                    cur_but["ypos"] + int(cur_but["height"] / 2) - int(button_font.size(str(button))[1] / 2)))
+            for event in pygame.event.get():
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if menu_buttons["play"]["active"]:
+                        status = "select"
+                    elif menu_buttons["settings"]["active"]:
+                        status = "settings"
+                    elif menu_buttons["quit"]["active"]:
+                        running = False
+                elif event.type == pygame.QUIT:
                     running = False
-            elif event.type == pygame.QUIT:
-                running = False
 
-    elif status == "settings":
-        screen.fill((128, 128, 128))
+        elif status == "settings":
+            screen.fill((128, 128, 128))
 
-    elif status == "select":
-        screen.fill((128, 128, 128))
-        for button in select_buttons:
-            cur_but = select_buttons[button]
-            button_font = pygame.font.SysFont('swis721', 30)
-            if mousex in range(cur_but["xpos"], cur_but["xpos"] + cur_but["width"]) and mousey in range(cur_but["ypos"],
-                                                                                                        cur_but[
-                                                                                                            "ypos"] +
-                                                                                                        cur_but[
-                                                                                                            "height"]):
-                pygame.draw.rect(screen, cur_but["highlight"],
-                                 (cur_but["xpos"], cur_but["ypos"], cur_but["width"], cur_but["height"]))
+        elif status == "select":
+            screen.fill((128, 128, 128))
+            for button in select_buttons:
+                cur_but = select_buttons[button]
+                button_font = pygame.font.SysFont('swis721', 30)
+                if mousex in range(cur_but["xpos"], cur_but["xpos"] + cur_but["width"]) and mousey in range(cur_but["ypos"],
+                                                                                                            cur_but[
+                                                                                                                "ypos"] +
+                                                                                                            cur_but[
+                                                                                                                "height"]):
+                    pygame.draw.rect(screen, cur_but["highlight"],
+                                     (cur_but["xpos"], cur_but["ypos"], cur_but["width"], cur_but["height"]))
 
-                cur_but["active"] = True
-            else:
-                pygame.draw.rect(screen, cur_but["color"],
-                                 (cur_but["xpos"], cur_but["ypos"], cur_but["width"], cur_but["height"]))
-                cur_but["active"] = False
-            text_surface = button_font.render(str(button), False, (0, 0, 0))
-            screen.blit(text_surface, (
-                cur_but["xpos"] + int(cur_but["width"] / 2) - int(button_font.size(str(button))[0] / 2),
-                cur_but["ypos"] + int(cur_but["height"] / 2) - int(button_font.size(str(button))[1] / 2)))
-        for event in pygame.event.get():
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                for level in select_buttons.keys():
-                    if select_buttons[level]["active"]:
-                        selection = level
-                        status = "level"
+                    cur_but["active"] = True
+                else:
+                    pygame.draw.rect(screen, cur_but["color"],
+                                     (cur_but["xpos"], cur_but["ypos"], cur_but["width"], cur_but["height"]))
+                    cur_but["active"] = False
+                text_surface = button_font.render(str(button), False, (0, 0, 0))
+                screen.blit(text_surface, (
+                    cur_but["xpos"] + int(cur_but["width"] / 2) - int(button_font.size(str(button))[0] / 2),
+                    cur_but["ypos"] + int(cur_but["height"] / 2) - int(button_font.size(str(button))[1] / 2)))
+            for event in pygame.event.get():
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    for level in select_buttons.keys():
+                        if select_buttons[level]["active"]:
+                            status = "level"
+                            active_level = []
+                            for item in stages[level]:
+                                active_level.append(item)
 
-    elif status == "level":
+        elif status == "level":
 
-        active_level = []
-        for item in stages[selection]:
-            active_level.append(item)
 
-        # (where, (colour R,G,B), (xpos, ypos, xsize, ysize)
-        screen.fill((128, 178, 128))
 
-        # drawing the grid
-        for xgrid in range(11):
-            pygame.draw.rect(screen, (220, 220, 220), (xgrid * 60 - 3, 0, 6, 600))
-        for ygrid in range(11):
-            pygame.draw.rect(screen, (220, 220, 220), (0, ygrid * 60 - 3, 600, 6))
-        pygame.time.delay(100)
+            # (where, (colour R,G,B), (xpos, ypos, xsize, ysize)
+            screen.fill((128, 178, 128))
 
-        # movement & collision
-        offsetx, offsety = active_level[0]
-        for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
+            # drawing the grid
+            for xgrid in range(11):
+                pygame.draw.rect(screen, (220, 220, 220), (xgrid * 60 - 3, 0, 6, 600))
+            for ygrid in range(11):
+                pygame.draw.rect(screen, (220, 220, 220), (0, ygrid * 60 - 3, 600, 6))
+            pygame.time.delay(100)
 
-                player_move = False
-                AI_move = False
-                player_collision = []
-                AI_collision = []
-                pushable_collision = []
-                other_collision = []
-                goal_position = []
+            # movement & collision
+            offsetx, offsety = active_level[0]
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
 
-                for object in active_level[1]:
-                    if object[2].player:
-                        player_collision.append([object[0], object[1]])
-                    elif object[2].ai_controlled:
-                        AI_collision.append([object[0], object[1]])
-                    elif object[2].pushable:
-                        pushable_collision.append([object[0], object[1]])
-                    elif object[2].goal:
-                        goal_position.append([object[0], object[1]])
-                    else:
-                        other_collision.append([object[0], object[1]])
-                player_x = 0
-                player_y = 0
-                AI_x = 0
-                AI_y = 0
-                if event.key == pygame.K_a:
-                    player_x = -1
-                    player_move = True
-                elif event.key == pygame.K_d:
-                    player_x = 1
-                    player_move = True
-                elif event.key == pygame.K_w:
-                    player_y = -1
-                    player_move = True
-                elif event.key == pygame.K_s:
-                    player_y = 1
-                    player_move = True
+                    player_move = False
+                    AI_move = False
+                    player_collision = []
+                    AI_collision = []
+                    pushable_collision = []
+                    other_collision = []
+                    goal_position = []
 
-                elif event.key == pygame.K_LEFT:
-                    AI_x = -1
-                    AI_move = True
-                elif event.key == pygame.K_RIGHT:
-                    AI_x = 1
-                    AI_move = True
-                elif event.key == pygame.K_UP:
-                    AI_y = -1
-                    AI_move = True
-                elif event.key == pygame.K_DOWN:
-                    AI_y = 1
-                    AI_move = True
-                # Collision
-                for object in active_level[1]:
-                    if player_move and object[2].player:
-                        if [object[0] + player_x, object[1] + player_y] in AI_collision or [object[0] + player_x, object[1] + player_y] in other_collision:
-                            continue
-                        elif [object[0] + player_x, object[1] + player_y] in goal_position:
-                            status = "menu"
+                    for object in active_level[1]:
+                        if object[2].player:
+                            player_collision.append([object[0], object[1]])
+                        elif object[2].ai_controlled:
+                            AI_collision.append([object[0], object[1]])
+                        elif object[2].pushable:
+                            pushable_collision.append([object[0], object[1]])
+                        elif object[2].goal:
+                            goal_position.append([object[0], object[1]])
                         else:
-                            if [object[0] + player_x, object[1] + player_y] in pushable_collision:
-                                for object2 in active_level[1]:
-                                    if object2[2].pushable and object2[0] == object[0] + player_x and object2[1] == object[1] + player_y:
-                                        if [object2[0] + player_x, object2[1] + player_y] in AI_collision or [object2[0] + player_x, object2[1] + player_y] in other_collision or [object2[0] + player_x, object2[1] + player_y] in pushable_collision:
-                                            continue
-                                        else:
-                                            object[0] += player_x
-                                            object[1] += player_y
-                                            object2[0] += player_x
-                                            object2[1] += player_y
+                            other_collision.append([object[0], object[1]])
+                    player_x = 0
+                    player_y = 0
+                    AI_x = 0
+                    AI_y = 0
+                    if event.key == pygame.K_a:
+                        player_x = -1
+                        player_move = True
+                    elif event.key == pygame.K_d:
+                        player_x = 1
+                        player_move = True
+                    elif event.key == pygame.K_w:
+                        player_y = -1
+                        player_move = True
+                    elif event.key == pygame.K_s:
+                        player_y = 1
+                        player_move = True
+
+                    elif event.key == pygame.K_LEFT:
+                        AI_x = -1
+                        AI_move = True
+                    elif event.key == pygame.K_RIGHT:
+                        AI_x = 1
+                        AI_move = True
+                    elif event.key == pygame.K_UP:
+                        AI_y = -1
+                        AI_move = True
+                    elif event.key == pygame.K_DOWN:
+                        AI_y = 1
+                        AI_move = True
+                    # Collision
+                    for object in active_level[1]:
+                        if player_move and object[2].player:
+                            if [object[0] + player_x, object[1] + player_y] in AI_collision or [object[0] + player_x, object[1] + player_y] in other_collision:
+                                continue
+                            elif [object[0] + player_x, object[1] + player_y] in goal_position:
+                                status = "menu"
                             else:
-                                object[0] += player_x
-                                object[1] += player_y
-                    elif AI_move and object[2].ai_controlled:
-                        if [object[0] + AI_x, object[1] + AI_y] in player_collision or [object[0] + AI_x, object[1] + AI_y] in other_collision or [object[0] + AI_x, object[1] + AI_y] in pushable_collision:
-                            continue
-                        else:
-                            object[0] += AI_x
-                            object[1] += AI_y
-                player_x = 0
-                player_y = 0
-                AI_x = 0
-                AI_y = 0
-            elif event.type == pygame.QUIT:
-                running = False
+                                if [object[0] + player_x, object[1] + player_y] in pushable_collision:
+                                    for object2 in active_level[1]:
+                                        if object2[2].pushable and object2[0] == object[0] + player_x and object2[1] == object[1] + player_y:
+                                            if [object2[0] + player_x, object2[1] + player_y] in AI_collision or [object2[0] + player_x, object2[1] + player_y] in other_collision or [object2[0] + player_x, object2[1] + player_y] in pushable_collision:
+                                                continue
+                                            else:
+                                                object[0] += player_x
+                                                object[1] += player_y
+                                                object2[0] += player_x
+                                                object2[1] += player_y
+                                else:
+                                    object[0] += player_x
+                                    object[1] += player_y
+                        elif AI_move and object[2].ai_controlled:
+                            if [object[0] + AI_x, object[1] + AI_y] in player_collision or [object[0] + AI_x, object[1] + AI_y] in other_collision or [object[0] + AI_x, object[1] + AI_y] in pushable_collision or [object[0] + AI_x, object[1] + AI_y] in AI_collision:
+                                continue
+                            else:
+                                object[0] += AI_x
+                                object[1] += AI_y
+                    player_x = 0
+                    player_y = 0
+                    AI_x = 0
+                    AI_y = 0
+                elif event.type == pygame.QUIT:
+                    running = False
 
-        # rendering everything
+            # rendering everything
 
-        for object in active_level[1]:
-            # in-game, no object should ever reach the outside border.
-            pos_x = object[0]
-            pos_y = object[1]
-            image = object[2].sprite
-            name = object[2].type
+            for object in active_level[1]:
+                # in-game, no object should ever reach the outside border.
+                pos_x = object[0]
+                pos_y = object[1]
+                image = object[2].sprite
+                name = object[2].type
 
 
-            # render:
-            image = pygame.transform.scale(image, (tile_size,tile_size))
-            screen.blit(image, ((offsetx + pos_x) * tile_size, (offsety + pos_y) * tile_size))
+                # render:
+                image = pygame.transform.scale(image, (tile_size,tile_size))
+                screen.blit(image, ((offsetx + pos_x) * tile_size, (offsety + pos_y) * tile_size))
 
-    pygame.display.update()
-pygame.quit()
-# End of QUIT
+        pygame.display.update()
+    pygame.quit()
+    # End of QUIT
+main()
