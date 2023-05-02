@@ -1,9 +1,7 @@
 # Start of Setup
 
 import pygame
-import attributes
-
-
+import time
 
 pygame.init()
 pygame.font.init()
@@ -27,15 +25,18 @@ player_x = 0
 player_y = 0
 AI_x = 0
 AI_y = 0
-from stage_storage import stage_data
+my_font = pygame.font.SysFont("Courier", 16)
+button_font = pygame.font.SysFont('Courier', 30)
+frame_count = 0
+frame_rate = 0
+t0 = time.process_time()
+
+from stage_storage import stage_data, dialogue
 
 stages = stage_data()
 
 status = "menu"
-
-# statuses:
-# menu = main menu
-
+# main menu buttons
 menu_buttons = {
     # "name" : [xpos, ypos, color, width, height]
     "play": {"xpos": int(screen_width / 2 - 75),
@@ -44,128 +45,188 @@ menu_buttons = {
              "highlight": (187, 255, 148),
              "width": 150,
              "height": 100,
-             "active": False},
+             "active": False,
+             "status": "select"},
     "settings": {"xpos": int((screen_width / 2 - 75)),
                  "ypos": int(screen_height / 2 - 50),
                  "color": (97, 189, 255),
                  "highlight": (148, 210, 255),
                  "width": 150,
                  "height": 100,
-                 "active": False},
+                 "active": False,
+                 "status": "settings"},
     "quit": {"xpos": int((screen_width / 2 - 75)),
              "ypos": int(screen_height / 2 - 50 + 200),
              "color": (255, 97, 97),
              "highlight": (255, 148, 148),
              "width": 150,
              "height": 100,
-             "active": False}
+             "active": False,
+             "status": "quit"}
 }
+# settings menu buttons
+settings_buttons = {"<": {"xpos": 0,
+                          "ypos": 0,
+                          "color": (150, 150, 150),
+                          "highlight": (200, 200, 200),
+                          "width": 50,
+                          "height": 50,
+                          "active": False,
+                          "status": "menu"}
 
-select_buttons = {}
+                    }
+# stage select menu buttons
+select_buttons = {"<": {"xpos": 0,
+                        "ypos": 0,
+                        "color": (150, 150, 150),
+                        "highlight": (200, 200, 200),
+                        "width": 30,
+                        "height": 30,
+                        "active": False,
+                        "status": "menu"},
+                  }
 button_count = 0
 for key in stages.keys():
-    select_buttons[key] = {"xpos": int((screen_width / 5 * (button_count % 5 + 1) - 25)),
-                           "ypos": int(screen_height / 5 * (button_count // 5 + 1) - 25),
+    select_buttons[key] = {"xpos": int((screen_width / 5 * (button_count % 5) + screen_width / 5 / 2 - 25)),
+                           "ypos": int(screen_height / 5 * (button_count // 5) + screen_height / 5 / 2 - 25),
                            "color": (161, 161, 161),
                            "highlight": (204, 204, 204),
                            "width": 50,
                            "height": 50,
-                           "active": False}
+                           "active": False,
+                           "status": key}
     button_count += 1
+# active level buttons
+level_number = 1
+level_buttons = {"<": {"xpos": 0,
+                       "ypos": 0,
+                       "color": (150, 150, 150),
+                       "highlight": (200, 200, 200),
+                       "width": 30,
+                       "height": 30,
+                       "active": False,
+                       "status": "select"},
+                 "R": {"xpos": 30,
+                       "ypos": 0,
+                       "color": (150, 150, 150),
+                       "highlight": (200, 200, 200),
+                       "width": 30,
+                       "height": 30,
+                       "active": False,
+                       "status": "reload"},
+                 }
 
-#   settings = settings menu
-#   select = choose a stage
-#       level = the active level
-#def main():
+complete_buttons = {"<": {"xpos": int(screen_height/2)-100,
+                       "ypos": int(screen_height/2)-50,
+                       "color": (150, 150, 150),
+                       "highlight": (200, 200, 200),
+                       "width": 100,
+                       "height": 100,
+                       "active": False,
+                       "status": "select"},
+                 ">": {"xpos": int(screen_height/2),
+                       "ypos": int(screen_height/2)-50,
+                       "color": (100, 150, 100),
+                       "highlight": (100, 200, 100),
+                       "width": 100,
+                       "height": 100,
+                       "active": False,
+                       "status": "next"},
+                 }
+
+def navigator(button_dict, mousex, mousey):
+    active = []
+    for button in button_dict:
+        cur_but = button_dict[button]
+        xrange = range(cur_but["xpos"], cur_but["xpos"] + cur_but["width"])
+        yrange = range(cur_but["ypos"], cur_but["ypos"] + cur_but["height"])
+        if mousex in xrange and mousey in yrange:
+            pygame.draw.rect(screen, cur_but["highlight"],
+                             (cur_but["xpos"], cur_but["ypos"], cur_but["width"], cur_but["height"]))
+
+            cur_but["active"] = True
+            active = cur_but["status"]
+        else:
+            pygame.draw.rect(screen, cur_but["color"],
+                             (cur_but["xpos"], cur_but["ypos"], cur_but["width"], cur_but["height"]))
+            cur_but["active"] = False
+        text_surface = button_font.render(str(button), False, (0, 0, 0))
+        screen.blit(text_surface, (
+            cur_but["xpos"] + int(cur_but["width"] / 2) - int(button_font.size(str(button))[0] / 2),
+            cur_but["ypos"] + int(cur_but["height"] / 2) - int(button_font.size(str(button))[1] / 2)))
+    return active
+
+
+def grid_draw(grid_amount, width1, color1, width2, color2):
+    for grid in range(grid_amount + 1):
+        pygame.draw.rect(screen, color1,
+                         (grid * int(screen_width / grid_amount) - int(width1 / 2), 0, width1, screen_height))
+        pygame.draw.rect(screen, color1,
+                         (0, grid * int(screen_height / grid_amount) - int(width1 / 2), screen_height, width1))
+    for grid in range(grid_amount + 1):
+        pygame.draw.rect(screen, color2,
+                         (grid * int(screen_width / grid_amount) - int(width2 / 2), 0, width2, screen_height))
+        pygame.draw.rect(screen, color2,
+                         (0, grid * int(screen_height / grid_amount) - int(width2 / 2), screen_height, width2))
+
 
 while running:
     mousex, mousey = pygame.mouse.get_pos()
     fps = 60
-
-    if status == "menu":
+    if status == "quit":
+        break
+    elif status == "menu":
         screen.fill((128, 128, 128))
-        for button in menu_buttons:
-            cur_but = menu_buttons[button]
-            button_font = pygame.font.SysFont('swis721', 30)
-            if mousex in range(cur_but["xpos"], cur_but["xpos"] + cur_but["width"]) and mousey in range(cur_but["ypos"],
-                                                                                                        cur_but[
-                                                                                                            "ypos"] +
-                                                                                                        cur_but[
-                                                                                                            "height"]):
-                pygame.draw.rect(screen, cur_but["highlight"],
-                                 (cur_but["xpos"], cur_but["ypos"], cur_but["width"], cur_but["height"]))
-
-                cur_but["active"] = True
-            else:
-                pygame.draw.rect(screen, cur_but["color"],
-                                 (cur_but["xpos"], cur_but["ypos"], cur_but["width"], cur_but["height"]))
-                cur_but["active"] = False
-            text_surface = button_font.render(str(button), False, (0, 0, 0))
-            screen.blit(text_surface, (
-                cur_but["xpos"] + int(cur_but["width"] / 2) - int(button_font.size(str(button))[0] / 2),
-                cur_but["ypos"] + int(cur_but["height"] / 2) - int(button_font.size(str(button))[1] / 2)))
+        grid_draw(3, 40, (192, 192, 192), 20, (255, 255, 255))
+        active_button = navigator(menu_buttons, mousex, mousey)
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if menu_buttons["play"]["active"]:
-                    status = "select"
-                elif menu_buttons["settings"]["active"]:
-                    status = "settings"
-                elif menu_buttons["quit"]["active"]:
-                    running = False
+                status = active_button
             elif event.type == pygame.QUIT:
-                running = False
+                status = "quit"
 
     elif status == "settings":
-        screen.fill((128, 128, 128))
-
-    elif status == "select":
-        screen.fill((128, 128, 128))
-        for button in select_buttons:
-            cur_but = select_buttons[button]
-            button_font = pygame.font.SysFont('swis721', 30)
-            if mousex in range(cur_but["xpos"], cur_but["xpos"] + cur_but["width"]) and mousey in range(cur_but["ypos"],
-                                                                                                        cur_but[
-                                                                                                            "ypos"] +
-                                                                                                        cur_but[
-                                                                                                            "height"]):
-                pygame.draw.rect(screen, cur_but["highlight"],
-                                 (cur_but["xpos"], cur_but["ypos"], cur_but["width"], cur_but["height"]))
-
-                cur_but["active"] = True
-            else:
-                pygame.draw.rect(screen, cur_but["color"],
-                                 (cur_but["xpos"], cur_but["ypos"], cur_but["width"], cur_but["height"]))
-                cur_but["active"] = False
-            text_surface = button_font.render(str(button), False, (0, 0, 0))
-            screen.blit(text_surface, (
-                cur_but["xpos"] + int(cur_but["width"] / 2) - int(button_font.size(str(button))[0] / 2),
-                cur_but["ypos"] + int(cur_but["height"] / 2) - int(button_font.size(str(button))[1] / 2)))
+        screen.fill((148, 210, 255))
+        active_button = navigator(settings_buttons, mousex, mousey)
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
-                for level in select_buttons.keys():
-                    if select_buttons[level]["active"]:
-                        stages = stage_data()
-                        status = "level"
-                        active_level = stages[level]
+                status = active_button
+            elif event.type == pygame.QUIT:
+                status = "quit"
+    elif status == "select":
+        screen.fill((187, 255, 148))
+        grid_draw(5, 40, (203, 255, 173), 20, (219, 255, 199))
 
+        active_button = navigator(select_buttons, mousex, mousey)
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                stages = stage_data()
+                if active_button == "menu":
+                    status = "menu"
+                else:
+                    level_number = active_button
+                    active_level = stages[active_button]
+                    status = "level"
+            elif event.type == pygame.QUIT:
+                status = "quit"
+    elif status == "reload":
+        stages = stage_data()
+        active_level = stages[level_number]
+        status = "level"
     elif status == "level":
-
-
 
         # (where, (colour R,G,B), (xpos, ypos, xsize, ysize)
         screen.fill((128, 178, 128))
 
         # drawing the grid
-        for xgrid in range(11):
-            pygame.draw.rect(screen, (220, 220, 220), (xgrid * 60 - 3, 0, 6, 600))
-        for ygrid in range(11):
-            pygame.draw.rect(screen, (220, 220, 220), (0, ygrid * 60 - 3, 600, 6))
-        pygame.time.delay(100)
-
+        grid_draw(10, 6, (220, 220, 220), 3, (128, 255, 128))
+        active_button = navigator(level_buttons, mousex, mousey)
         # movement & collision
         offsetx, offsety = active_level[0]
         for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                status = active_button
+            elif event.type == pygame.KEYDOWN:
 
                 player_move = False
                 AI_move = False
@@ -218,15 +279,21 @@ while running:
                 # Collision
                 for object in active_level[1]:
                     if player_move and object[2].player:
-                        if [object[0] + player_x, object[1] + player_y] in AI_collision or [object[0] + player_x, object[1] + player_y] in other_collision:
+                        if [object[0] + player_x, object[1] + player_y] in AI_collision or [object[0] + player_x,
+                                                                                            object[
+                                                                                                1] + player_y] in other_collision:
                             continue
                         elif [object[0] + player_x, object[1] + player_y] in goal_position:
-                            status = "menu"
+                            status = "complete"
                         else:
                             if [object[0] + player_x, object[1] + player_y] in pushable_collision:
                                 for object2 in active_level[1]:
-                                    if object2[2].pushable and object2[0] == object[0] + player_x and object2[1] == object[1] + player_y:
-                                        if [object2[0] + player_x, object2[1] + player_y] in AI_collision or [object2[0] + player_x, object2[1] + player_y] in other_collision or [object2[0] + player_x, object2[1] + player_y] in pushable_collision:
+                                    if object2[2].pushable and object2[0] == object[0] + player_x and object2[1] == \
+                                            object[1] + player_y:
+                                        if [object2[0] + player_x, object2[1] + player_y] in AI_collision or [
+                                            object2[0] + player_x, object2[1] + player_y] in other_collision or [
+                                            object2[0] + player_x, object2[1] + player_y] in pushable_collision or [
+                                            object2[0] + player_x, object2[1] + player_y] in goal_position:
                                             continue
                                         else:
                                             object[0] += player_x
@@ -237,7 +304,11 @@ while running:
                                 object[0] += player_x
                                 object[1] += player_y
                     elif AI_move and object[2].ai_controlled:
-                        if [object[0] + AI_x, object[1] + AI_y] in player_collision or [object[0] + AI_x, object[1] + AI_y] in other_collision or [object[0] + AI_x, object[1] + AI_y] in pushable_collision or [object[0] + AI_x, object[1] + AI_y] in AI_collision:
+                        if [object[0] + AI_x, object[1] + AI_y] in player_collision or [object[0] + AI_x, object[
+                                                                                                              1] + AI_y] in other_collision or [
+                            object[0] + AI_x, object[1] + AI_y] in pushable_collision or [object[0] + AI_x, object[
+                                                                                                                1] + AI_y] in AI_collision or [
+                            object[0] + AI_x, object[1] + AI_y] in goal_position:
                             continue
                         else:
                             object[0] += AI_x
@@ -258,12 +329,34 @@ while running:
             image = object[2].sprite
             name = object[2].type
 
-
             # render:
-            image = pygame.transform.scale(image, (tile_size,tile_size))
+            image = pygame.transform.scale(image, (tile_size, tile_size))
             screen.blit(image, ((offsetx + pos_x) * tile_size, (offsety + pos_y) * tile_size))
+            text_surface = my_font.render(dialogue(level_number), False, (0, 0, 0))
+            screen.blit(text_surface, (0, screen_height - 50))
+    elif status == "complete":
+        screen.fill((104, 255, 77))
+        grid_draw(6, 40, (124, 217, 108), 20, (133, 179, 125))
+        active_button = navigator(complete_buttons, mousex, mousey)
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if active_button == "next":
+                    level_number += 1
+                    status = "reload"
+                else:
+                    status = active_button
+            elif event.type == pygame.QUIT:
+                status = "quit"
+    elif status == "quit":
+        break
+    frame_count += 1
+    if frame_count % 500 == 0:
+        t1 = time.process_time()
+        frame_rate = 500 / (t1 - t0)
+        t0 = t1
+    the_text = my_font.render("{1:.2f} fps".format(frame_count, frame_rate), True, (50, 50, 50))
 
+    screen.blit(the_text, (10, 584))
     pygame.display.update()
 pygame.quit()
 # End of QUIT
-
