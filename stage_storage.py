@@ -10,10 +10,11 @@ props = {
     "Goal": attributes.Attributes("Player", True, False, False, False, False, "", True, pygame.image.load("sprites\\Goal.png").convert_alpha()),
 }
 def dialogue(stage_number):
-    text = {1: "Player uses WASD to move",
-            2: "Player can push wooden boxes",
-            3: "AI uses arrow keys to move, AI cannot push player",
-            4: "Ai cannot push boxes either (remember this)"}
+    text = {1: "Player uses WASD to move.",
+            2: "Player can push wooden boxes.",
+            3: "AI uses arrow keys to move, AI cannot push player.",
+            4: "Ai cannot push boxes either (remember this).",
+            5: "AI & Player should work together."}
     if stage_number in text.keys():
         return text[stage_number]
 def stage_data():
